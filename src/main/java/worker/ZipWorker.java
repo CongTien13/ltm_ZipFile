@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import controller.JobStatusServlet;
 import model.bean.UploadedFile;
 import model.dao.ZipJobDAO;
 import util.JobQueue;
@@ -33,13 +34,16 @@ public class ZipWorker implements Runnable {
         System.out.println(">>> Zip Worker thread has started!");
         while (running) {
             int jobId = -1;
+            String fileName = "result_" + jobId;
             try {
                 // 1. Chờ và lấy một job ID từ hàng đợi
                 jobId = JobQueue.getInstance().takeJob();
+                fileName = JobQueue.getInstance().takeName();
                 System.out.println(">>> Worker processing Job ID: " + jobId);
 
                 // 2. Cập nhật trạng thái job thành "PROCESSING"
                 zipJobDAO.updateJobStatusAndResult(jobId, "PROCESSING", null);
+                JobStatusServlet.broadcastJobUpdate(jobId, "PROCESSING");
                 
                 // 3. Lấy danh sách các file cần nén từ CSDL
                 List<UploadedFile> filesToZip = zipJobDAO.getFilesForJob(jobId);
@@ -49,7 +53,7 @@ public class ZipWorker implements Runnable {
                 }
                 
                 // 4. THỰC HIỆN LOGIC NÉN FILE
-                String resultZipPath = ZIP_OUTPUT_DIRECTORY + File.separator + "result_" + jobId + ".zip";
+                String resultZipPath = ZIP_OUTPUT_DIRECTORY + File.separator + fileName + ".zip";
                 
                 // Sử dụng try-with-resources để đảm bảo các stream được đóng tự động
                 try (FileOutputStream fos = new FileOutputStream(resultZipPath);
@@ -80,6 +84,7 @@ public class ZipWorker implements Runnable {
 
                 // 5. Cập nhật trạng thái job thành "COMPLETED"
                 zipJobDAO.updateJobStatusAndResult(jobId, "COMPLETED", resultZipPath);
+                JobStatusServlet.broadcastJobUpdate(jobId, "COMPLETED");
                 System.out.println(">>> Worker finished Job ID: " + jobId + ". ZIP file created at: " + resultZipPath);
 
             } catch (InterruptedException e) {
@@ -91,6 +96,7 @@ public class ZipWorker implements Runnable {
                 // Nếu có lỗi, cập nhật trạng thái job thành "FAILED"
                 if (jobId != -1) {
                     zipJobDAO.updateJobStatusAndResult(jobId, "FAILED", null);
+                    JobStatusServlet.broadcastJobUpdate(jobId, "FAILED");
                 }
             }
         }

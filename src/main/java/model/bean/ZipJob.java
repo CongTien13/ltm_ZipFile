@@ -13,11 +13,11 @@ public class ZipJob {
     private String status; // Ví dụ: "PENDING", "PROCESSING", "COMPLETED", "FAILED"
     private Timestamp creationDate;
     private String resultFilepath; // Đường dẫn tới file ZIP sau khi nén xong
+    private String fileName;
 
     // Constructor rỗng
     public ZipJob() {
     }
-
     // Getters and Setters
 
     public int getId() {
@@ -59,4 +59,12 @@ public class ZipJob {
     public void setResultFilepath(String resultFilepath) {
         this.resultFilepath = resultFilepath;
     }
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
 }

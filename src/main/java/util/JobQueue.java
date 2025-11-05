@@ -11,9 +11,11 @@ public class JobQueue {
     
     private static JobQueue instance;
     private BlockingQueue<Integer> queue; // Hàng đợi sẽ chỉ chứa các job ID
+    private BlockingQueue<String> nameQueue;
 
     private JobQueue() {
         queue = new LinkedBlockingQueue<>();
+        nameQueue = new LinkedBlockingQueue<String>();
     }
 
     /**
@@ -31,9 +33,10 @@ public class JobQueue {
      * Thêm một job ID vào cuối hàng đợi.
      * @param jobId ID của job cần xử lý.
      */
-    public void addJob(int jobId) {
+    public void addJob(int jobId,String name) {
         try {
             queue.put(jobId);
+            nameQueue.put(name);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt(); // Restore the interrupted status
             e.printStackTrace();
@@ -48,5 +51,9 @@ public class JobQueue {
      */
     public int takeJob() throws InterruptedException {
         return queue.take();
+    }
+    
+    public String takeName() throws InterruptedException {
+        return nameQueue.take();
     }
 }

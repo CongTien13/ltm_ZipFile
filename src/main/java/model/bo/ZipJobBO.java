@@ -32,6 +32,7 @@ public class ZipJobBO {
         return zipJobDAO.getJobsByUserId(userId);
     }
     
+    
     public int createJobWithDetails(int userId, String[] fileIds) {
         // Bước 1: Gọi DAO để tạo bản ghi job chính trong bảng 'zip_jobs'
         int jobId = zipJobDAO.createJob(userId);

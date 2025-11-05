@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/fmt" prefix = "fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -97,6 +98,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <header class="header">
@@ -109,49 +111,83 @@
 
     <main class="container">
         <div class="card">
-            <h4>Lịch sử các tác vụ nén
-                 <small style="color: #6c757d; font-weight: normal;">(Nhấn F5 để làm mới)</small>
-            </h4>
-            <c:choose>
-                <c:when test="${not empty jobList}">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width:10%;">Job ID</th>
-                                <th>Ngày yêu cầu</th>
-                                <th style="width:15%;">Trạng thái</th>
-                                <th style="width:20%;">Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach items="${jobList}" var="job">
-                                <tr>
-                                    <td><strong>#${job.id}</strong></td>
-                                    <td><fmt:formatDate value = "${job.creationDate}" pattern = "HH:mm:ss, dd/MM/yyyy" /></td>
-                                    <td>
-                                        <span class="status-badge status-${job.status.toLowerCase()}">
-                                            <c:out value="${job.status}" />
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <c:if test="${job.status == 'COMPLETED'}">
-                                            <a href="${pageContext.request.contextPath}/DownloadServlet?jobId=${job.id}" class="action-link">Tải xuống</a>
-                                        </c:if>
-                                        <c:if test="${job.status != 'COMPLETED'}">
-                                            -
-                                        </c:if>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
-                </c:when>
-                <c:otherwise>
-                    <p>Chưa có tác vụ nén nào được thực hiện.</p>
-                </c:otherwise>
-            </c:choose>
+            <h4>Lịch sử các tác vụ nén</h4>
+            <div id="jobList">
+	            <c:choose>
+	                <c:when test="${not empty jobList}">
+	                    <table>
+	                        <thead>
+	                            <tr>
+	                                <th style="width:10%;">Job ID</th>
+	                                <th style="width:20%;">Ngày yêu cầu</th>
+	                                <th>Tên file</th>
+	                                <th style="width:15%;">Trạng thái</th>
+	                                <th style="width:20%;">Hành động</th>
+	                            </tr>
+	                        </thead>
+	                        <tbody>
+	                            <c:forEach items="${jobList}" var="job">
+	                                <tr>
+	                                    <td><strong>#${job.id}</strong></td>
+	                                    <td><fmt:formatDate value = "${job.creationDate}" pattern = "HH:mm:ss, dd/MM/yyyy" /></td>
+	                                    <td>${job.fileName}</td>
+	                                    <td>
+	                                        <span class="status-badge status-${job.status.toLowerCase()}">
+	                                            <c:out value="${job.status}" />
+	                                        </span>
+	                                    </td>
+	                                    <td>
+	                                        <c:if test="${job.status == 'COMPLETED'}">
+	                                            <a href="${pageContext.request.contextPath}/DownloadServlet?jobId=${job.id}" class="action-link">Tải xuống</a>
+	                                        </c:if>
+	                                        <c:if test="${job.status != 'COMPLETED'}">
+	                                            -
+	                                        </c:if>
+	                                    </td>
+	                                </tr>
+	                            </c:forEach>
+	                        </tbody>
+	                    </table>
+	                </c:when>
+	                <c:otherwise>
+	                    <p>Chưa có tác vụ nén nào được thực hiện.</p>
+	                </c:otherwise>
+	            </c:choose>
+            </div>
         </div>
     </main>
-
+	
+	<script>
+	    // Mở kết nối tới servlet SSE
+	    const evtSource = new EventSource("${pageContext.request.contextPath}/JobStatusServlet");
+	
+	    evtSource.onmessage = function(e) {
+	        console.log(" Job update:", e.data);
+	
+	        // Khi nhận được thông báo — có thể reload phần danh sách
+	        refreshJobList();
+	    };
+	
+	    async function refreshJobList() {
+	        try {
+	            const response = await fetch("${pageContext.request.contextPath}/JobHistoryServlet");
+	            const html = await response.text();
+	
+	            // Giả sử danh sách job nằm trong <div id="jobList">
+	            const parser = new DOMParser();
+	            const newList = parser.parseFromString(html, "text/html").querySelector("#jobList");
+	
+	            if (newList) {
+	                document.getElementById("jobList").innerHTML = newList.innerHTML;
+	            }
+	        } catch (err) {
+	            console.error("Không thể làm mới danh sách job:", err);
+	        }
+	    }
+	    
+	    document.addEventListener("DOMContentLoaded", () => {
+	        refreshJobList();
+	    });
+	</script>
 </body>
 </html>

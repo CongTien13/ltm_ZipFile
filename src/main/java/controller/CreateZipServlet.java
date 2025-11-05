@@ -20,6 +20,9 @@ public class CreateZipServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         String[] selectedFileIds = request.getParameterValues("selectedFiles");
+        
+        String zipName = request.getParameter("zipName");
+        String password = request.getParameter("password");
 
         if (selectedFileIds != null && selectedFileIds.length > 0) {
             
@@ -28,7 +31,7 @@ public class CreateZipServlet extends HttpServlet {
             
             if (jobId != -1) {
                 // Thêm job ID vào hàng đợi để Worker xử lý
-                JobQueue.getInstance().addJob(jobId);
+                JobQueue.getInstance().addJob(jobId, zipName);
                 session.setAttribute("message", "Yêu cầu nén file đã được gửi đi.");
             } else {
                 session.setAttribute("error", "Không thể tạo yêu cầu nén file.");

@@ -65,7 +65,15 @@ public class ZipJobDAO {
                 job.setUserId(rs.getInt("user_id"));
                 job.setStatus(rs.getString("status"));
                 job.setCreationDate(rs.getTimestamp("creation_date"));
-                job.setResultFilepath(rs.getString("result_filepath"));
+                
+                String resultPath = rs.getString("result_filepath");
+                job.setResultFilepath(resultPath);
+
+                if (resultPath != null && !resultPath.isEmpty()) {
+                    job.setFileName(new java.io.File(resultPath).getName());
+                } else {
+                    job.setFileName(""); // hoặc "Chưa có file"
+                }
                 jobList.add(job);
             }
             
@@ -74,6 +82,7 @@ public class ZipJobDAO {
         }
         return jobList;
     }
+    
     
     /**
      * Cập nhật trạng thái và đường dẫn file kết quả cho một tác vụ.
