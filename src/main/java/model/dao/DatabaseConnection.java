@@ -4,30 +4,27 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/**
- * Lớp tiện ích để quản lý việc kết nối đến cơ sở dữ liệu.
- */
 public class DatabaseConnection {
-    // Thông tin kết nối cho XAMPP mặc định
-    private static final String JDBC_URL = "jdbc:mysql://localhost:3306/web_ltm_db";
-    private static final String JDBC_USER = "root";
-    private static final String JDBC_PASSWORD = ""; // Mật khẩu rỗng
+    private static final String serverName = "LAPTOP-QL9Q0H5Q";
+    private static final String dbName = "web_ltm_db";
+    private static final String portNumber = "3306";
+    private static final String userID = "root";
+    private static final String password = "123456";
 
-    /**
-     * Phương thức tĩnh để lấy một kết nối đến CSDL.
-     * @return một đối tượng Connection hoặc null nếu có lỗi.
-     */
     public static Connection getConnection() {
-        Connection connection = null;
+        Connection conn = null;
         try {
-            // Nạp driver MySQL Connector/J
+            String url = "jdbc:mysql://localhost:" + portNumber + "/" + dbName + "?useSSL=false&serverTimezone=UTC";
             Class.forName("com.mysql.cj.jdbc.Driver");
-            // Thực hiện kết nối
-            connection = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
-        } catch (ClassNotFoundException | SQLException e) {
-            // In ra lỗi nếu có vấn đề xảy ra
+            conn = DriverManager.getConnection(url, userID, password);
+            System.out.println("Kết nối cơ sở dữ liệu thành công!");
+        } catch (ClassNotFoundException e) {
+            System.err.println("Không tìm thấy Driver JDBC MySQL!");
+            e.printStackTrace();
+        } catch (SQLException e) {
+            System.err.println("Lỗi kết nối cơ sở dữ liệu!");
             e.printStackTrace();
         }
-        return connection;
+        return conn;
     }
 }
