@@ -1,5 +1,4 @@
 package worker;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -19,7 +18,7 @@ public class ZipWorker implements Runnable {
     private volatile boolean running = true;
     
     // Tạo một thư mục riêng để lưu các file ZIP kết quả
-    private static final String ZIP_OUTPUT_DIRECTORY = "D:/web_ltm_zips";
+    private static final String ZIP_OUTPUT_DIRECTORY = "F:/web_ltm_zips";
 
     public ZipWorker() {
         // Đảm bảo thư mục output tồn tại khi Worker được tạo

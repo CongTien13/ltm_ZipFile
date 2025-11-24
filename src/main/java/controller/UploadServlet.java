@@ -20,7 +20,7 @@ public class UploadServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private FileBO fileBO = new FileBO();
     // Cấu hình đường dẫn lưu file (nên đặt trong web.xml)
-    private static final String UPLOAD_DIRECTORY = "D:/web_ltm_uploads";
+    private static final String UPLOAD_DIRECTORY = "F:/web_ltm_uploads";
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();

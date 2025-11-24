@@ -1,0 +1,130 @@
+'@startuml mvc_diagram
+' Clean MVC diagram for ltm_ZipFile (reorganized)
+skinparam componentStyle rectangle
+left to right direction
+
+' --- Views (left top)
+package "Views (JSP)" as V {
+  [login.jsp]
+  [register.jsp]
+  [home.jsp]
+  [job_history.jsp]
+}
+
+' --- Controllers (center top)
+package "Controllers (Servlets)" as C {
+  [LoginServlet]
+  [RegisterServlet]
+  [HomeServlet]
+  [UploadServlet]
+  [CreateZipServlet]
+  [JobHistoryServlet]
+  [JobStatusServlet]
+  [DownloadServlet]
+  [AuthenticationFilter]
+}
+
+' --- Business (center)
+package "Business / Service (BO)" as B {
+  [UserBO]
+  [FileBO]
+  [ZipJobBO]
+}
+
+' --- Data Access (right center)
+package "Data Access (DAO)" as D {
+  [UserDAO]
+  [FileDAO]
+  [ZipJobDAO]
+  [DatabaseConnection]
+}
+
+' --- Models (bottom left)
+package "Models (Beans)" as M {
+  [User]
+  [UploadedFile]
+  [ZipJob]
+}
+
+' --- Background / infra (right)
+package "Background / Infra" as I {
+  [AppContextListener]
+  [ZipWorker]
+  [JobQueue]
+  [FileSystem\nuploads/zips]
+  [MySQL Database]
+}
+
+' Layout hints (reduce crossing)
+V -down-> C
+C -down-> B
+B -down-> D
+D -down-> I
+M -up-> D
+
+' Simple call arrows (grouped)
+' Authentication & navigation
+ [login.jsp] --> [LoginServlet] : POST /LoginServlet
+ [register.jsp] --> [RegisterServlet] : POST /RegisterServlet
+ [home.jsp] --> [HomeServlet] : GET /HomeServlet
+ [job_history.jsp] --> [JobHistoryServlet] : GET /JobHistoryServlet
+
+' Controllers -> BO (business logic)
+ [LoginServlet] --> [UserBO]
+ [RegisterServlet] --> [UserBO]
+ [HomeServlet] --> [FileBO]
+ [UploadServlet] --> [FileBO]
+ [CreateZipServlet] --> [ZipJobBO]
+ [JobHistoryServlet] --> [ZipJobBO]
+
+' BO -> DAO -> DB
+ [UserBO] --> [UserDAO]
+ [FileBO] --> [FileDAO]
+ [ZipJobBO] --> [ZipJobDAO]
+ [UserDAO] --> [DatabaseConnection]
+ [FileDAO] --> [DatabaseConnection]
+ [ZipJobDAO] --> [DatabaseConnection]
+ [DatabaseConnection] --> [MySQL Database]
+
+' Models used by DAOs
+ [UserDAO] ..> [User]
+ [FileDAO] ..> [UploadedFile]
+ [ZipJobDAO] ..> [ZipJob]
+
+' Background/Job flow (separated block)
+' Create job (metadata) -> enqueue -> worker -> zip -> update DB -> notify
+ [CreateZipServlet] --> [ZipJobBO] : createJobWithDetails()
+ [ZipJobBO] --> [ZipJobDAO] : INSERT job + details
+ [CreateZipServlet] --> [JobQueue] : addJob(jobId, zipName)
+ [AppContextListener] --> [ZipWorker] : start()
+ [ZipWorker] --> [JobQueue] : takeJob()
+ [ZipWorker] --> [ZipJobDAO] : getFilesForJob(jobId)
+ [ZipWorker] --> [FileSystem\nuploads/zips] : create .zip
+ [ZipWorker] --> [ZipJobDAO] : updateJobStatusAndResult()
+ [ZipWorker] --> [JobStatusServlet] : broadcastJobUpdate()
+ [JobStatusServlet] --> [job_history.jsp] : SSE event
+@enduml
+
+' Notes (compact)
+note right of UploadServlet
+  UploadServlet.java
+  - saves uploaded file via FileBO
+end note
+
+note right of ZipWorker
+  ZipWorker.java
+  - reads server_filepath from DB
+  - writes ZIP to configured output
+end note
+
+note left of DatabaseConnection
+  DatabaseConnection.java
+  - JDBC URL/user/password (move to config)
+end note
+
+note right of JobQueue
+  util/JobQueue.java
+  - in-memory BlockingQueue (jobId,name)
+end note
+
+@enduml
