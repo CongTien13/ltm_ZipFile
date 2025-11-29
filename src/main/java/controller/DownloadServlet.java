@@ -82,7 +82,7 @@ public class DownloadServlet extends HttpServlet {
         // Thiết lập header quan trọng nhất: "Content-Disposition"
         // "attachment" sẽ báo cho trình duyệt mở hộp thoại "Save As..."
         String headerKey = "Content-Disposition";
-        String headerValue = String.format("attachment; filename=\"%s\"", "download_job_" + jobId + ".zip");
+        String headerValue = String.format("attachment; filename=\"%s\"",jobToDownload.getFileName(), ".zip");
         response.setHeader(headerKey, headerValue);
 
         // --- BƯỚC 4: ĐỌC FILE VÀ GHI VÀO OUTPUT STREAM CỦA RESPONSE ---

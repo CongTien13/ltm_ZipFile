@@ -373,20 +373,20 @@
 
         // Xóa input cũ nếu có để tránh trùng lặp
         form.querySelector('input[name="zipName"]')?.remove();
-        form.querySelector('input[name="password"]')?.remove();
+        //form.querySelector('input[name="password"]')?.remove();
 
         const nameInput = document.createElement('input');
         nameInput.type = 'hidden';
         nameInput.name = 'zipName';
         nameInput.value = zipName;
 
-        const passInput = document.createElement('input');
-        passInput.type = 'hidden';
-        passInput.name = 'password';
-        passInput.value = document.getElementById('password').value;
+        //const passInput = document.createElement('input');
+        //passInput.type = 'hidden';
+        //passInput.name = 'password';
+        //passInput.value = document.getElementById('password').value;
 
         form.appendChild(nameInput);
-        form.appendChild(passInput);
+        //form.appendChild(passInput);
 
         form.submit();
         closeModal();

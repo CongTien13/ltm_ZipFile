@@ -22,7 +22,7 @@ public class CreateZipServlet extends HttpServlet {
         String[] selectedFileIds = request.getParameterValues("selectedFiles");
         
         String zipName = request.getParameter("zipName");
-        String password = request.getParameter("password");
+        //String password = request.getParameter("password");
 
         if (selectedFileIds != null && selectedFileIds.length > 0) {
             

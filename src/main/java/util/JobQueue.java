@@ -49,7 +49,7 @@ public class JobQueue {
      * @return job ID.
      * @throws InterruptedException
      */
-    public int takeJob() throws InterruptedException {
+    public int  takeJob() throws InterruptedException {
         return queue.take();
     }
     
